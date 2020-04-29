@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/robfig/cron/v3"
@@ -186,6 +187,24 @@ func (wp *WorkerPool) PeriodicallyEnqueue(spec string, jobName string) *WorkerPo
 	if err != nil {
 		panic(err)
 	}
+
+	wp.periodicJobs = append(wp.periodicJobs, &periodicJob{jobName: jobName, spec: spec, schedule: schedule})
+
+	return wp
+}
+
+func (wp *WorkerPool) PeriodicallyEnqueueInZone(spec string, jobName string, locale string) *WorkerPool {
+	p := cron.NewParser(cron.SecondOptional | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
+
+	schedule, err := p.Parse(spec)
+	if err != nil {
+		panic(err)
+	}
+	loc, err := time.LoadLocation(locale)
+	if err != nil {
+		panic(err)
+	}
+	schedule.(*cron.SpecSchedule).Location = loc
 
 	wp.periodicJobs = append(wp.periodicJobs, &periodicJob{jobName: jobName, spec: spec, schedule: schedule})
 
