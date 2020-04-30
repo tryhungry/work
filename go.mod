@@ -1,4 +1,4 @@
-module github.com/mmacheerpuppy/work
+module github.com/tryhungry/work
 
 go 1.14
 
