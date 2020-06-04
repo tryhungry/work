@@ -193,7 +193,7 @@ func (wp *WorkerPool) PeriodicallyEnqueue(spec string, jobName string) *WorkerPo
 	return wp
 }
 
-func (wp *WorkerPool) PeriodicallyEnqueueInZone(spec string, jobName string, locale string) *WorkerPool {
+func (wp *WorkerPool) PeriodicallyEnqueueInZone(spec, jobName, locale string, args map[string]interface{}) *WorkerPool {
 	p := cron.NewParser(cron.SecondOptional | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor)
 
 	schedule, err := p.Parse(spec)
@@ -206,7 +206,12 @@ func (wp *WorkerPool) PeriodicallyEnqueueInZone(spec string, jobName string, loc
 	}
 	schedule.(*cron.SpecSchedule).Location = loc
 
-	wp.periodicJobs = append(wp.periodicJobs, &periodicJob{jobName: jobName, spec: spec, schedule: schedule})
+	wp.periodicJobs = append(wp.periodicJobs, &periodicJob{
+		jobName:  jobName,
+		spec:     spec,
+		schedule: schedule,
+		args:     args,
+	})
 
 	return wp
 }
